@@ -44,6 +44,8 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "Add Microsoft Foundry news digest for ${FILE#microsoft-foundry-news-}" \
+          DATE="${FILE#microsoft-foundry-news-}"
+          DATE="${DATE%.md}"
+          git commit -m "Add Microsoft Foundry news digest for ${DATE}" \
             -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
           git push origin HEAD:${GITHUB_REF_NAME}
