@@ -1,0 +1,49 @@
+name: Daily Microsoft Foundry News
+
+# Runs entirely on GitHub-hosted cloud runners — no local machine required.
+on:
+  schedule:
+    # 08:00 UTC every day. Cron in GitHub Actions is always UTC.
+    - cron: "0 8 * * *"
+  workflow_dispatch: {}  # allow manual runs from the Actions tab
+
+permissions:
+  contents: write   # commit & push the generated digest
+  models: read      # best-effort AI summary via GitHub Models
+
+concurrency:
+  group: daily-foundry-news
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate news digest
+        id: gen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/generate_foundry_news.py
+
+      - name: Commit and push digest
+        env:
+          FILE: ${{ steps.gen.outputs.file }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Add Microsoft Foundry news digest for ${FILE#microsoft-foundry-news-}" \
+            -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+          git push origin HEAD:${GITHUB_REF_NAME}
