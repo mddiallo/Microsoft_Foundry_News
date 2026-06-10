@@ -1,83 +1,80 @@
 # Microsoft Foundry — Daily News Digest
 
-**Date:** June 10, 2026
+**Date:** 2026-06-10 (UTC)
 
-> A roundup of the latest Microsoft Foundry news, drawn from Microsoft Build 2026 coverage and official updates. The overarching theme: Foundry is moving from experimental to **production-ready**, making AI agents first-class citizens with a full runtime, memory, enterprise/web access, and rigorous governance.
+> Automated digest generated from official Microsoft Foundry and Azure blog feeds.
 
----
+> **Note:** No brand-new Microsoft Foundry items were published in the source feeds today. Below are the most recent relevant updates.
 
-## 1. Production Runtime for Agents
+## Executive Summary
 
-- **Hosted Agents** are reaching general availability with sandboxed, **hypervisor-isolated** sessions, persistent state, direct filesystem access, and source-code deployment via the Azure Developer CLI.
-- Per-agent **Entra ID** identity, built-in content safety, **Voice Live** and WebSocket support.
-- Compatible with **Microsoft Agent Framework, GitHub Copilot SDK, LangGraph**, and others — no major rewrites needed.
-- **Foundry Agent Framework 1.0** is now generally available (stable orchestration, lifecycle management).
-- **Agent Control Specification (ACS)** is in preview for deterministic runtime controls and governance.
-- General availability for the production hosted-agent service is expected by **July 2026**.
+Microsoft Foundry has introduced several new capabilities aimed at enhancing AI development and deployment. Key announcements include the launch of Foundry Managed Compute for hosting open models, improvements in document translation services, and the Agent Optimizer for better agent performance in production. Additionally, the focus is shifting from building AI agents to effectively distributing and utilizing them within enterprises, addressing challenges in scaling and operational reliability.
 
-## 2. Model Catalog Expansion
+## Headlines
 
-- **11,000–12,000+ models** now available (Microsoft, OpenAI, Anthropic, NVIDIA, Fireworks AI).
-- **Fireworks AI** generally available; **OpenAI GPT-5.5** and **Anthropic Claude Opus 4.8** in preview.
-- New **MAI (Microsoft AI)** models:
-  - **MAI-Thinking-1** — enterprise-grade reasoning (private preview)
-  - **MAI-Code-1-Flash** — code, rolling out in VS Code
-  - **MAI-Image-2.5** — image generation
-  - **MAI-Voice-2** — voice
-  - **MAI-Transcribe-1.5** — transcription
-- Improved performance, larger context windows, and lower costs; support for fine-tuning and managed compute.
+### [Accelerate Edge AI Development with Foundry Local](https://devblogs.microsoft.com/foundry/accelerate-edge-ai-development-with-foundry-local/)
 
-## 3. Foundry IQ, Memory & Knowledge
+*2026-06-04 — Microsoft Foundry Blog*
 
-- **Foundry IQ** serves as a unified **knowledge plane**, connecting enterprise and web knowledge for agentic retrieval — reducing custom RAG plumbing.
-- Expands to **serverless retrieval** and easy connection to multiple knowledge sources.
-- **Agent memory** (public preview): procedural, user, and session memory.
-- **Web IQ** enables real-time web grounding, ~2.5x faster than alternatives.
+Why edge AI development is still hard  AI is no longer confined to cloud experiments. Developers are increasingly expected to deliver AI inside apps, devices, and edge systems where responsiveness, privacy, resilience, and local control are essential. But building those experiences for production is still difficult.  Teams often have to solve model packaging, runtime fragmentation, hardware…
 
-## 4. Toolbox, Integration & Voice
+### [Build 2026: From observability to ROI for AI agents on any framework](https://devblogs.microsoft.com/foundry/build-2026-from-observability-to-roi-for-ai-agents-on-any-framework/)
 
-- **Foundry Toolkit for VS Code** is now generally available — faster agent development.
-- **Toolboxes** (public preview) centralize tools, skills, MCP clients, and enterprise data through a governed endpoint (web/code search, OpenAPI tools, Azure AI Search, agent-to-agent connections).
-- **Model Context Protocol (MCP)** is now the default integration layer across Microsoft's stack (Teams SDK, Copilot, Agent 365, and more).
-- Foundry agents can **one-click publish** to **Microsoft Teams** and **Microsoft 365 Copilot** (GA June 2026).
-- **Voice Live API** (available): real-time recognition, text-to-speech, interruption, and avatars.
+*2026-06-03 — Microsoft Foundry Blog*
 
-## 5. Trust, Governance & Observability
+9 min read · June 3, 2026 · Sebastian Kohlmeier    Shipping an AI agent is the easy part. Keeping it accurate, safe, and accountable in production is where teams get stuck. Agents are non-deterministic. Their behavior shifts as models update, tools change, and traffic patterns evolve and most of that drift happens silently, long after the demo. End-to-end observability covering […]
+The post Build…
 
-- New evaluation and safety tooling: **ASSERT, Agent Control Specification, Guided Guardrail Setup, Rubric, Agent Optimizer, Agent ROI**.
-- Tracing and observability for production monitoring and regulatory compliance.
-- Policy-driven, deterministic run-time controls bring safety and testing closer to the developer loop.
+### [Expanding the Reach of Document Translation – New Capabilities Announced at Microsoft Build](https://devblogs.microsoft.com/foundry/document-translation-build-2026/)
 
-## 6. New Product — Microsoft Scout
+*2026-06-03 — Microsoft Foundry Blog*
 
-- **Microsoft Scout**, the first **"autopilot" agent** — an always-on autonomous agent with its own identity.
-- In preview for **Windows and Mac** as part of a new agent-first hardware and OS/runtime stack.
+Learn how new Document Translation capabilities in Azure Translator, available in Foundry Tools, help developers translate images, PDFs, Office files, DITA, XLIFF, and future LLM-powered document workflows.
+The post Expanding the Reach of Document Translation – New Capabilities Announced at Microsoft Build appeared first on Microsoft Foundry
 
----
+### [Announcing Foundry Managed Compute: Run open models in Microsoft Foundry](https://devblogs.microsoft.com/foundry/announcing-foundry-managed-compute/)
 
-## Strategic Takeaways
+*2026-06-03 — Microsoft Foundry Blog*
 
-- Focus has shifted from raw model capability to **reliability, governability, and practical production deployment**.
-- **MCP** is now the common "language" for agents across the ecosystem, reducing integration friction.
-- AI agents are evolving from simple assistants into **autonomous systems** with memory, tool-use, and integrated business workflows.
+Microsoft Foundry Managed Compute is a new GPU platform-as-a-service for hosting open-source and custom AI models behind the same endpoint, SDKs, and bill as frontier models.
+The post Announcing Foundry Managed Compute: Run open models in Microsoft Foundry appeared first on Microsoft Foundry
 
-## What's Next
+### [Introducing Agent Optimizer in Foundry Agent Service](https://devblogs.microsoft.com/foundry/agent-optimizer-build2026/)
 
-- Hosted Agents reach **GA in July 2026**.
-- One-click publishing to Teams / M365 Copilot by **June 2026**.
-- More models and hardware integrations rolling out through the summer.
+*2026-06-03 — Microsoft Foundry Blog*
 
----
+With hosted agents, we made it straightforward to build and deploy agents on Foundry. You write your logic, run azd deploy, and your agent is live. But “live” and “production-ready” aren’t the same thing. The gap shows up quickly. Your customer support agent handles requests, but it forgets to ask for an order number before looking […]
+The post Introducing Agent Optimizer in Foundry Agent Service…
+
+### [Making agent memory more reliable, transparent, and production-ready](https://devblogs.microsoft.com/foundry/memory-build2026/)
+
+*2026-06-03 — Microsoft Foundry Blog*
+
+Memory has always mattered for personalization and continuity. But as customers move agents from demos into production, another requirement becomes just as important: reliability.   Enterprise teams need agents that not only remember facts, but also apply what they have learned to follow procedures consistently, recover from repeated failure modes, and complete tasks with greater confidence over…
+
+### [Discovery to Execution: Scaling Agents with Toolboxes and Routines in Microsoft Foundry](https://devblogs.microsoft.com/foundry/toolbox-build-26/)
+
+*2026-06-03 — Microsoft Foundry Blog*
+
+Tooling doesn’t break at a small scale—it breaks when teams move to production. AI adoption accelerates, so does the number of tools available to them. Discovering, managing and securing the right tools has quickly become one of the biggest challenges in building production-grade agents. Today, we are announcing new capabilities in Toolboxes in Foundry: Skills […]
+The post Discovery to Execution:…
+
+### [From Building Agents to Working with Them: Enterprise Agent Distribution in Microsoft Foundry](https://devblogs.microsoft.com/foundry/from-building-agents-to-working-with-them-enterprise-agent-distribution-in-microsoft-foundry/)
+
+*2026-06-03 — Microsoft Foundry Blog*
+
+The past year was about building agents. The next year is about putting them to work.  Organizations have moved quickly from experimenting with AI agents to building ones that perform complex business processes and execute long-running tasks. But the bottleneck has shifted. The challenge is no longer building agents — it’s getting them into the hands of […]
+The post From Building Agents to…
+
+### [Build smarter document workflows: What’s new in Azure Content Understanding at Build 2026](https://devblogs.microsoft.com/foundry/whats-new-in-azure-content-understanding-at-build-2026/)
+
+*2026-06-03 — Microsoft Foundry Blog*
+
+Azure Content Understanding (CU) in Foundry Tools is Microsoft’s comprehensive content AI service. It ingests diverse data types — documents, audio, images, and video — and extracts the most critical information to power well-grounded, reliable generative AI and agentic solutions. Azure Content Understanding brings together Azure Document Intelligence’s proven traditional AI with advanced…
 
 ## Sources
 
-- [What's new in Microsoft Foundry | Build Edition — Microsoft DevBlogs](https://devblogs.microsoft.com/foundry/whats-new-in-microsoft-foundry-build-2026/)
-- [Announcing 3 new world-class MAI models, available in Foundry — microsoft.ai](https://microsoft.ai/news/today-were-announcing-3-new-world-class-mai-models-available-in-foundry/)
-- [With Foundry, Microsoft bets the enterprise AI battle is about agents — The New Stack](https://thenewstack.io/microsoft-foundry-build-2026-ai-agents/)
-- [Microsoft Build 2026: MCP and the Agent Stack — arcade.dev](https://www.arcade.dev/blog/microsoft-build-2026-agent-stack/)
-- [Microsoft Build 2026 Recap — All AI Announcements — aguidetocloud.com](https://www.aguidetocloud.com/blog/microsoft-build-2026-recap/)
-- [Microsoft Build 2026 recap — testingcatalog.com](https://www.testingcatalog.com/microsoft-build-2026-recap-from-windows-to-copilot-all-ai/)
-- [Everything Microsoft Announced at Build 2026 — The Neuron](https://www.theneuron.ai/explainer-articles/everything-microsoft-announced-at-microsoft-build-2026-explained/)
-- [microsoft/Build26-news — GitHub](https://github.com/microsoft/Build26-news/blob/main/news.md)
+- [Microsoft Foundry Blog](https://devblogs.microsoft.com/foundry/)
+- [Azure Blog](https://azure.microsoft.com/en-us/blog/)
 
-*Generated June 10, 2026. Headlines are drawn from publicly reported coverage; verify specifics against official Microsoft sources before relying on them.*
+*Generated automatically on 2026-06-10T13:48:51.053841+00:00 by the daily GitHub Actions workflow.*
