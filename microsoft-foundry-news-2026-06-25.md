@@ -13,4 +13,4 @@ There is no new Microsoft Foundry news for 2026-06-25. Every relevant item curre
 - [Microsoft Foundry Blog](https://devblogs.microsoft.com/foundry/)
 - [Azure Blog](https://azure.microsoft.com/en-us/blog/)
 
-*Generated automatically on 2026-06-25T07:46:28.453393+00:00 by the daily GitHub Actions workflow.*
+*Generated automatically on 2026-06-25T10:47:19.332255+00:00 by the daily GitHub Actions workflow.*
