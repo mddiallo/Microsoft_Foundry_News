@@ -36,6 +36,7 @@ jobs:
       - name: Commit and push digest
         env:
           FILE: ${{ steps.gen.outputs.file }}
+          HAS_NEWS: ${{ steps.gen.outputs.has_news }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -46,6 +47,11 @@ jobs:
           fi
           DATE="${FILE#microsoft-foundry-news-}"
           DATE="${DATE%.md}"
-          git commit -m "Add Microsoft Foundry news digest for ${DATE}" \
+          if [ "$HAS_NEWS" = "true" ]; then
+            MSG="Add Microsoft Foundry news digest for ${DATE}"
+          else
+            MSG="Add Microsoft Foundry no-news marker for ${DATE}"
+          fi
+          git commit -m "$MSG" \
             -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
           git push origin HEAD:${GITHUB_REF_NAME}
