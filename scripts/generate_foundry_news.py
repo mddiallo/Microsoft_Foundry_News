@@ -6,6 +6,10 @@ library so it needs no third-party dependencies. Pulls official Microsoft
 Foundry / Azure blog RSS feeds, filters for Foundry-relevant items, and writes
 ``microsoft-foundry-news-YYYY-MM-DD.md`` (today's UTC date).
 
+Before writing, the script scans previously generated daily digests and drops
+any item whose link has already been published. If nothing new remains, it
+writes a short "no news" digest for the day instead of repeating older items.
+
 If a ``GITHUB_TOKEN`` with ``models: read`` permission is present, the script
 adds a best-effort AI executive summary via the GitHub Models API. If that call
 fails for any reason, the script still produces a complete deterministic digest.
@@ -14,8 +18,10 @@ fails for any reason, the script still produces a complete deterministic digest.
 from __future__ import annotations
 
 import datetime as dt
+import glob
 import json
 import os
+import re
 import sys
 import urllib.request
 import urllib.error
@@ -36,6 +42,11 @@ KEYWORDS = ("foundry", "ai foundry", "azure ai foundry")
 USER_AGENT = "foundry-news-bot/1.0 (+https://github.com/mddiallo/Microsoft_Foundry_News)"
 RECENT_WINDOW_DAYS = 7
 HTTP_TIMEOUT = 30
+
+# Previously generated digests are named like this; we scan them to find links
+# that have already been published so the same item is never repeated.
+NEWS_GLOB = "microsoft-foundry-news-*.md"
+HEADLINE_LINK_RE = re.compile(r"^###\s+\[.*\]\((.+)\)\s*$")
 
 
 def fetch(url: str) -> bytes:
@@ -106,6 +117,44 @@ def gather_items() -> list[dict]:
     return all_items
 
 
+def published_links(today: dt.date) -> set[str]:
+    """Return links already present in previously generated daily digests.
+
+    Each digest lists items as ``### [title](link)`` headlines. We collect every
+    such link so items that were already published are not repeated. Today's own
+    file is skipped so manual re-runs on the same day stay idempotent.
+    """
+    today_file = f"microsoft-foundry-news-{today.isoformat()}.md"
+    links: set[str] = set()
+    for path in sorted(glob.glob(NEWS_GLOB)):
+        if os.path.basename(path) == today_file:
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    match = HEADLINE_LINK_RE.match(line.strip())
+                    if match:
+                        links.add(match.group(1).strip())
+        except OSError as exc:
+            print(f"warning: could not read {path}: {exc}", file=sys.stderr)
+    return links
+
+
+def select_new_items(today: dt.date, items: list[dict],
+                     already_published: set[str]) -> list[dict]:
+    """Keep recent items whose link has not appeared in an earlier digest."""
+    cutoff = today - dt.timedelta(days=RECENT_WINDOW_DAYS)
+    new_items: list[dict] = []
+    for it in items:
+        if not it["link"] or it["link"] in already_published:
+            continue
+        published = it["published"]
+        if published is not None and not (cutoff <= published.date() <= today):
+            continue
+        new_items.append(it)
+    return new_items
+
+
 def ai_summary(items: list[dict]) -> str | None:
     """Best-effort executive summary via GitHub Models. Returns None on failure."""
     token = os.environ.get("GITHUB_TOKEN")
@@ -141,15 +190,17 @@ def ai_summary(items: list[dict]) -> str | None:
         return None
 
 
-def build_markdown(today: dt.date, items: list[dict]) -> str:
-    today_items = [it for it in items if it["published"] and it["published"].date() == today]
-    cutoff = today - dt.timedelta(days=RECENT_WINDOW_DAYS)
-    recent_items = [it for it in items
-                    if it["published"] and cutoff <= it["published"].date() <= today]
-    no_new = not today_items
-    display = today_items if today_items else recent_items[:10]
+SOURCES_FOOTER = [
+    "## Sources",
+    "",
+    "- [Microsoft Foundry Blog](https://devblogs.microsoft.com/foundry/)",
+    "- [Azure Blog](https://azure.microsoft.com/en-us/blog/)",
+    "",
+]
 
-    lines = [
+
+def _header(today: dt.date) -> list[str]:
+    return [
         "# Microsoft Foundry — Daily News Digest",
         "",
         f"**Date:** {today.isoformat()} (UTC)",
@@ -159,57 +210,69 @@ def build_markdown(today: dt.date, items: list[dict]) -> str:
         "",
     ]
 
-    if no_new:
-        lines += [
-            "> **Note:** No brand-new Microsoft Foundry items were published in the "
-            "source feeds today. Below are the most recent relevant updates.",
-            "",
-        ]
 
-    summary = ai_summary(display)
-    if summary:
-        lines += ["## Executive Summary", "", summary, ""]
-
-    lines += ["## Headlines", ""]
-    if display:
-        for it in display:
-            date_str = it["published"].date().isoformat() if it["published"] else "n/a"
-            lines.append(f"### [{it['title']}]({it['link']})")
-            lines.append("")
-            lines.append(f"*{date_str} — {it['source']}*")
-            lines.append("")
-            if it["summary"]:
-                lines.append(it["summary"])
-                lines.append("")
-    else:
-        lines += ["_No Foundry-related items found in the source feeds._", ""]
-
-    lines += [
-        "## Sources",
-        "",
-        "- [Microsoft Foundry Blog](https://devblogs.microsoft.com/foundry/)",
-        "- [Azure Blog](https://azure.microsoft.com/en-us/blog/)",
-        "",
+def _footer() -> list[str]:
+    return SOURCES_FOOTER + [
         f"*Generated automatically on {dt.datetime.now(dt.timezone.utc).isoformat()} "
         "by the daily GitHub Actions workflow.*",
         "",
     ]
-    return "\n".join(lines)
+
+
+def build_markdown(today: dt.date, new_items: list[dict]) -> str:
+    """Render the digest for ``today`` from items not seen in earlier digests.
+
+    When ``new_items`` is empty every relevant feed item has already been
+    published, so a short "no news" digest is produced for the day.
+    """
+    lines = _header(today)
+
+    if not new_items:
+        lines += [
+            "## No News Today",
+            "",
+            f"There is no new Microsoft Foundry news for {today.isoformat()}. "
+            "Every relevant item currently available in the source feeds has "
+            "already been covered in a previous daily digest.",
+            "",
+        ]
+        return "\n".join(lines + _footer())
+
+    summary = ai_summary(new_items)
+    if summary:
+        lines += ["## Executive Summary", "", summary, ""]
+
+    lines += ["## Headlines", ""]
+    for it in new_items:
+        date_str = it["published"].date().isoformat() if it["published"] else "n/a"
+        lines.append(f"### [{it['title']}]({it['link']})")
+        lines.append("")
+        lines.append(f"*{date_str} — {it['source']}*")
+        lines.append("")
+        if it["summary"]:
+            lines.append(it["summary"])
+            lines.append("")
+
+    return "\n".join(lines + _footer())
 
 
 def main() -> int:
     today = dt.datetime.now(dt.timezone.utc).date()
     items = gather_items()
-    markdown = build_markdown(today, items)
+    already = published_links(today)
+    new_items = select_new_items(today, items, already)
+    markdown = build_markdown(today, new_items)
     out_name = f"microsoft-foundry-news-{today.isoformat()}.md"
     with open(out_name, "w", encoding="utf-8") as fh:
         fh.write(markdown)
-    print(f"Wrote {out_name} ({len(markdown)} chars, {len(items)} items gathered)")
-    # Expose the filename to later workflow steps.
+    print(f"Wrote {out_name} ({len(markdown)} chars; {len(items)} gathered, "
+          f"{len(already)} previously published, {len(new_items)} new)")
+    # Expose results to later workflow steps.
     gh_out = os.environ.get("GITHUB_OUTPUT")
     if gh_out:
         with open(gh_out, "a", encoding="utf-8") as fh:
             fh.write(f"file={out_name}\n")
+            fh.write(f"has_news={'true' if new_items else 'false'}\n")
     return 0
 
 
