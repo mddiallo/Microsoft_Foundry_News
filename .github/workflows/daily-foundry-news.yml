@@ -8,8 +8,8 @@ on:
   workflow_dispatch: {}  # allow manual runs from the Actions tab
 
 permissions:
-  contents: write   # commit & push the generated digest
-  models: read      # best-effort AI summary via GitHub Models
+  contents: write   # commit & push the generated digests
+  models: read      # per-news explanations via GitHub Models
 
 concurrency:
   group: daily-foundry-news
@@ -27,30 +27,32 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Generate news digest
+      - name: Generate news digests
         id: gen
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEWS_EXPLAINER_AGENT: Microsoft Foundry News Explainer
         run: python scripts/generate_foundry_news.py
 
-      - name: Commit and push digest
+      - name: Commit and push digests
         env:
-          FILE: ${{ steps.gen.outputs.file }}
+          FILES: ${{ steps.gen.outputs.files }}
+          DIGEST_DATE: ${{ steps.gen.outputs.date }}
           HAS_NEWS: ${{ steps.gen.outputs.has_news }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$FILE"
+          for file in $FILES; do
+            git add "$file"
+          done
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
-          DATE="${FILE#microsoft-foundry-news-}"
-          DATE="${DATE%.md}"
           if [ "$HAS_NEWS" = "true" ]; then
-            MSG="Add Microsoft Foundry news digest for ${DATE}"
+            MSG="Add Microsoft Foundry news digests for ${DIGEST_DATE}"
           else
-            MSG="Add Microsoft Foundry no-news marker for ${DATE}"
+            MSG="Add Microsoft Foundry no-news digests for ${DIGEST_DATE}"
           fi
           git commit -m "$MSG" \
             -m "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
